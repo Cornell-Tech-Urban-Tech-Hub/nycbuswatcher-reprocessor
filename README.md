@@ -2,6 +2,19 @@
 - v1 2021 Apr 28
 - Anthony Townsend <atownsend@cornell.edu>
 
+
+### why i'm dumb
+
+the way that nycbuswatcher creates the daily archives is nasty. all the SIRI responses are concatenated into a single file, but without line breaks so its impossible to read and even `awk` runs out of memory.
+
+# spliting the archives
+
+`awk '/{"Siri"/{x="F"++i;}{print > x;}' daily-2021-01-24`
+
+
+
+
+
 # TO DO AS OF APRIL 28 IN NOTEBOOK
 1. dates as kwargs
     - start = 2021-04-01

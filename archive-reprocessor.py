@@ -1,15 +1,13 @@
 # archive-reprocessor.py
 # 28 april 2021
 
-#filenames like
-# daily-2021-01-24.gz
-
-#import pandas as pd
 from fnmatch import fnmatch
 import os
 import gzip
 import shutil
-import tempfile
+import sys
+from json_stream_parser import load_iter
+from Database import *
 
 
 def get_daily_filelist(path):
@@ -23,32 +21,40 @@ def get_daily_filelist(path):
 	return sorted_daily_filelist
 
 
-def unzip_to_file(infile, outfile):
-	with gzip.open(infile, 'r') as f_in, open(outfile, 'wb') as f_out:
-		shutil.copyfileobj(f_in, f_out)
-		return
-
-
-
-# main loop
 if __name__ == "__main__":
 
 	datadir = os.getcwd()+'/data/'
-	print(datadir)
-
 	dailies = get_daily_filelist(datadir)
 
 	for daily_filename in dailies:
-		print ('reading {}{}'.format(datadir,daily_filename))
 
-		# decompress the file to temp dir
-		with tempfile.TemporaryDirectory() as temp_dir:
-			infile = datadir+daily_filename
-			outfile = temp_dir + '{}.json'.format(daily_filename)
-			unzip_to_file(infile, outfile)
-			print ('Decompressed {} to {}'.format(infile,outfile))
+		gzipfile = datadir + daily_filename
+		ungzipfile = datadir + '{}.json'.format(daily_filename)
 
-			with open(outfile, 'r', encoding='utf-8') as f:
-				print('opening {}'.format(outfile))
-				char = f.read(100)
-				print (char)
+		# try to load the uncompressed file from disk
+		try:
+			f = open(ungzipfile, 'r')
+			f.close()
+
+		# if not exist, unzip it
+		except:
+			print('Unzipping {}{}'.format(datadir, daily_filename))
+			with gzip.open(gzipfile, 'rb') as f_in:
+				with open(ungzipfile, 'wb') as f_out:
+					shutil.copyfileobj(f_in, f_out)
+
+		finally:
+			# parse and dump all responses
+			# https://pypi.org/project/json-stream-parser/
+			sys.stdout.write('Parsing JSON responses and dumping to db.')
+			with open(ungzipfile, 'r') as f:
+				responseGenerator = (r for r in load_iter(f))
+				db_url=get_db_url()
+				create_table(db_url)
+				session = get_session()
+				for response in responseGenerator:
+					sys.stdout.write('.')
+					bus = parse_bus(response, db_url)
+					session.add(bus)
+				session.commit()
+
