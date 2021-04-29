@@ -7,8 +7,10 @@
 #import pandas as pd
 from fnmatch import fnmatch
 import os
-import datetime as dt
+import gzip
+import shutil
 import tempfile
+
 
 def get_daily_filelist(path):
 	daily_filelist=[]
@@ -20,43 +22,33 @@ def get_daily_filelist(path):
 	sorted_daily_filelist = sorted(daily_filelist, key=lambda daily_filelist: daily_filelist[6:16])
 	return sorted_daily_filelist
 
-def get_route_filelist(temp_path):
-	
-	# daily_filelist=[]
-	# include_list = ['daily*.gz']
-	# for dirname, _, filenames in os.walk(path):
-	# 	for filename in filenames:
-	# 		if any(fnmatch(filename, pattern) for pattern in include_list):
-	# 			daily_filelist.append(filename)
-	# sorted_daily_filelist = sorted(daily_filelist, key=lambda daily_filelist: daily_filelist[6:16])
-	# return sorted_daily_filelist
+
+def unzip_to_file(infile, outfile):
+	with gzip.open(infile, 'r') as f_in, open(outfile, 'wb') as f_out:
+		shutil.copyfileobj(f_in, f_out)
+		return
 
 
-def unzip_daily_to_temp(path, temp_path,filename):
-
-	return
 
 # main loop
-if __name__ == "main":
+if __name__ == "__main__":
 
-	path = os.getcwd()+'/data'
+	datadir = os.getcwd()+'/data/'
+	print(datadir)
 
-	dailies = get_daily_filelist(path)
+	dailies = get_daily_filelist(datadir)
 
-	for daily_file in dailies:
-		unzip_daily_to_temp(path, temp_path, daily_file)
-		tf = tempfile.NamedTemporaryFile()
+	for daily_filename in dailies:
+		print ('reading {}{}'.format(datadir,daily_filename))
 
-		# get list of file names in temp_path
+		# decompress the file to temp dir
+		with tempfile.TemporaryDirectory() as temp_dir:
+			infile = datadir+daily_filename
+			outfile = temp_dir + '{}.json'.format(daily_filename)
+			unzip_to_file(infile, outfile)
+			print ('Decompressed {} to {}'.format(infile,outfile))
 
-		# for them 
-			# unzip each of those to a temp path
-			with tempfile.TemporaryDirectory() as tmpdirname:
-			    print('Created temporary directory:', tmpdirname)
-
-
-				# then parse in a df
-			# concatenate dfs
-			# does it delete folder automatically outside the with context handler?
-		# concatenate dfs again
-		# dump df to a CSV
+			with open(outfile, 'r', encoding='utf-8') as f:
+				print('opening {}'.format(outfile))
+				char = f.read(100)
+				print (char)
