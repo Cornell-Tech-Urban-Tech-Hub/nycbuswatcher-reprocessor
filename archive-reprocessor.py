@@ -51,10 +51,10 @@ if __name__ == "__main__":
 				responseGenerator = (r for r in load_iter(f))
 				db_url=get_db_url()
 				create_table(db_url)
-				session = get_session()
+				session = get_session(db_url)
 				for response in responseGenerator:
 					sys.stdout.write('.')
 					bus = parse_bus(response, db_url)
 					session.add(bus)
-				session.commit()
+					session.commit()
 

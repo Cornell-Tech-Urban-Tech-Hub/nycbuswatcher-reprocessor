@@ -34,11 +34,11 @@ def create_table(db_url):
 #     return session
 
 def get_db_url():
-    return 'sqlite:///data/database.file'
+    return 'sqlite:///data/database.sqlite3'
 
 
-def get_session():
-    engine = create_engine('sqlite:///data/database.file', echo=False)
+def get_session(db_url):
+    engine = create_engine('sqlite:///data/database.sqlite3', echo=False)
     Session = sessionmaker(bind=engine)
     session = Session()
     return session
