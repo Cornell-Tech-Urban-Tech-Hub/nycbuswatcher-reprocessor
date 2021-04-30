@@ -1,3 +1,7 @@
+# todo might make sense to just process the whole text file and insert a newline before every instance of
+# {"Siri"
+
+
 # archive-reprocessor.py
 # 28 april 2021
 
@@ -9,6 +13,8 @@ import sys
 from json_stream_parser import load_iter
 from Parser import *
 import csv
+import datetime as dt
+import ijson
 
 def get_daily_filelist(path):
     daily_filelist=[]
@@ -23,6 +29,7 @@ def get_daily_filelist(path):
 
 if __name__ == "__main__":
 
+    print ('started at {}'.format(dt.datetime.now().strftime('%H-%M')))
     datadir = os.getcwd()+'/data/'
     dailies = get_daily_filelist(datadir)
 
@@ -48,11 +55,19 @@ if __name__ == "__main__":
             # parse and dump all responses
             # https://pypi.org/project/json-stream-parser/
             sys.stdout.write('Parsing JSON responses and dumping to CSV.')
-            with open(ungzipfile, 'r') as f:
-                responseGenerator = (r for r in load_iter(f))
+
+            # # json_stream_parser load_iter streaming decoder
+            # with open(ungzipfile, 'r') as f:
+            #     responseGenerator = (r for r in load_iter(f))
+
+            # ijson stream decoder https://github.com/ICRAR/ijson instead?
+            f = open(ungzipfile, 'r')
+            responses = ijson.items(f, 'Siri.MonitoredVehicleJourney.item' )
+            for r in responses:
+                print(r)
 
 
-                with open('{}{}.csv'.format(datadir,daily_filename), 'w') as csvfile:
+            with open('{}{}.csv'.format(datadir,daily_filename), 'w') as csvfile:
                     # writer = csv.writer(csvfile)
 
                     headers=[
@@ -71,3 +86,4 @@ if __name__ == "__main__":
                     for response in responseGenerator:
                         writer.writerow(parse_bus(response))
                         sys.stdout.write('.')
+    print ('finished at {}'.format(dt.datetime.now().strftime('%H-%M')))
