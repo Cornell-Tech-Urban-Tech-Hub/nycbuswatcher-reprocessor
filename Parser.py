@@ -32,13 +32,13 @@ def parse_bus(response):
                 try:
                     if len(v) == 2:
                         val = b['MonitoredVehicleJourney'][v[0]][v[1]]
-                        setattr(bus, k, val)
+                        bus[k]=val
                     elif len(v) == 4:
                         val = b['MonitoredVehicleJourney'][v[0]][v[1]][v[2]][v[3]]
-                        setattr(bus, k, val)
+                        bus[k]=val
                     else:
                         val = b['MonitoredVehicleJourney'][v[0]]
-                        setattr(bus, k, val)
+                        bus[k]=val
                 except LookupError:
                     pass
                 except Exception as e:
