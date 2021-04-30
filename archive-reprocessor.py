@@ -1,7 +1,14 @@
+# todo 1 reload the original Database.py code and start over, adding a line to grab the ResponseTimestamp from ['Siri']['ServiceDelivery']['ResponseTimestamp']
+# todo 2 assume that parsing each Siri response returns multiple buses here
+
+
+
+
 # archive-reprocessor.py
 # 28 april 2021
 
 from fnmatch import fnmatch
+import datetime
 import os
 import gzip
 import shutil
@@ -21,7 +28,15 @@ def get_daily_filelist(path):
 	return sorted_daily_filelist
 
 
+def db_init(daily_filename):
+	db_url = get_db_url(daily_filename)
+	create_table(db_url)
+	session = get_session(db_url)
+	return session
+
 if __name__ == "__main__":
+
+	print ('started at {}'.format(datetime.datetime.now()))
 
 	datadir = os.getcwd()+'/data/'
 	dailies = get_daily_filelist(datadir)
@@ -48,13 +63,13 @@ if __name__ == "__main__":
 			# https://pypi.org/project/json-stream-parser/
 			sys.stdout.write('Parsing JSON responses and dumping to db.')
 			with open(ungzipfile, 'r') as f:
-				responseGenerator = (r for r in load_iter(f))
-				db_url=get_db_url()
-				create_table(db_url)
-				session = get_session()
-				for response in responseGenerator:
-					sys.stdout.write('.')
-					bus = parse_buses(response, db_url)
-					session.add(bus)
-				session.commit()
+				session = db_init(daily_filename)
+				for siri_response in load_iter(f):
+					buses = parse_buses(siri_response)
+					for bus in buses:
+						session.add(bus)
+						sys.stdout.write('.')
+				session.commit() # if too slow, de-indent me?
+
+	print ('finished at {}'.format(datetime.datetime.now()))
 

@@ -33,18 +33,18 @@ def create_table(db_url):
 #     session = Session()
 #     return session
 
-def get_db_url():
-    return 'sqlite:///data/database.file'
+def get_db_url(daily_filename):
+    return 'sqlite:///data/{}.sqlite3'.format(daily_filename)
 
 
-def get_session():
-    engine = create_engine('sqlite:///data/database.file', echo=False)
+def get_session(db_url):
+    engine = create_engine(db_url, echo=False)
     Session = sessionmaker(bind=engine)
     session = Session()
     return session
 
 
-def parse_bus(data, db_url):
+def parse_buses(siri_response):
     lookup = {'route_long':['LineRef'],
               'direction':['DirectionRef'],
               'service_date': ['FramedVehicleJourneyRef', 'DataFrameRef'],
@@ -70,10 +70,11 @@ def parse_bus(data, db_url):
               'gtfs_block_id':['BlockRef'],
               'passenger_count': ['MonitoredCall', 'Extensions','Capacities','EstimatedPassengerCount']
               }
-
+    buses = []
     try:
-        for b in data['Siri']['ServiceDelivery']['VehicleMonitoringDelivery'][0]['VehicleActivity']:
-            bus = BusObservation()
+        timestamp=siri_response['Siri']['ServiceDelivery']['ResponseTimestamp']
+        for b in siri_response['Siri']['ServiceDelivery']['VehicleMonitoringDelivery'][0]['VehicleActivity']:
+            bus = BusObservation(timestamp)
             for k,v in lookup.items():
                 try:
                     if len(v) == 2:
@@ -89,10 +90,11 @@ def parse_bus(data, db_url):
                     pass
                 except Exception as e:
                     pass
-
+            buses.append(bus)
     except KeyError: #no VehicleActivity?
         pass
-    return bus
+    return buses # returns a list of BusObservation objects
+
 
 
 class BusObservation(Base):
@@ -133,5 +135,6 @@ class BusObservation(Base):
                 output = output + ('{} {} '.format(var,val))
         return output
 
-    def __init__(self):
-        pass
+    def __init__(self,timestamp):
+        self.timestamp = timestamp
+
