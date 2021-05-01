@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import Column, Date, DateTime, Integer, String, Float
 from sqlalchemy.ext.declarative import declarative_base
 
+import datetime
 
 # v1.0 to v1.11 manual migration
 # ALTER TABLE buses ADD(passenger_count varchar(31));
@@ -136,5 +137,5 @@ class BusObservation(Base):
         return output
 
     def __init__(self,timestamp):
-        self.timestamp = timestamp
+        self.timestamp = datetime.datetime.fromisoformat(timestamp)
 

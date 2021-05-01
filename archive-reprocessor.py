@@ -1,14 +1,7 @@
-# todo 1 reload the original Database.py code and start over, adding a line to grab the ResponseTimestamp from ['Siri']['ServiceDelivery']['ResponseTimestamp']
-# todo 2 assume that parsing each Siri response returns multiple buses here
-
-
-
-
 # archive-reprocessor.py
-# 28 april 2021
+# 30 april 2021
 
 from fnmatch import fnmatch
-import datetime
 import os
 import gzip
 import shutil
@@ -36,12 +29,12 @@ def db_init(daily_filename):
 
 if __name__ == "__main__":
 
-	print ('started at {}'.format(datetime.datetime.now()))
-
 	datadir = os.getcwd()+'/data/'
 	dailies = get_daily_filelist(datadir)
 
 	for daily_filename in dailies:
+
+		print('started at {}'.format(datetime.datetime.now()))
 
 		gzipfile = datadir + daily_filename
 		ungzipfile = datadir + '{}.json'.format(daily_filename)
@@ -68,8 +61,8 @@ if __name__ == "__main__":
 					buses = parse_buses(siri_response)
 					for bus in buses:
 						session.add(bus)
-						sys.stdout.write('.')
-				session.commit() # if too slow, de-indent me?
+						# sys.stdout.write('.') # <-- is this the big slowdown?
+					session.commit() # if too slow, de-indent me?
 
-	print ('finished at {}'.format(datetime.datetime.now()))
+			print ('finished at {}'.format(datetime.datetime.now()))
 
