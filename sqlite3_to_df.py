@@ -13,11 +13,15 @@ def daily_buses_df_generator():
 
     for daily_filename in dailies:
         sqlite_filename = datadir + daily_filename[-3]
+        df_name = 'df' + daily_filename[-3]
+        print('Reading {} into {}'.format(sqlite_filename,df_name))
         # Create your connection.
         cnx = sqlite3.connect(sqlite_filename)
         yield pd.read_sql_query("SELECT * FROM buses", cnx)
 
 
+# generates a
 if __name__ == "__main__":
+    data = []
     for day in daily_buses_df_generator():
-        pass
+        data.append(day)

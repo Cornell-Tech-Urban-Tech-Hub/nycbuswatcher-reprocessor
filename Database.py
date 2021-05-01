@@ -7,6 +7,8 @@ from sqlalchemy.ext.declarative import declarative_base
 import datetime
 from fnmatch import fnmatch
 
+import os
+
 # v1.0 to v1.11 manual migration
 # ALTER TABLE buses ADD(passenger_count varchar(31));
 #

@@ -16,10 +16,9 @@ The script will look in `./data` for any files in the form of `daily-YYYY-MM-DD.
 
 Each daily file takes about 30 minutes to parse on a typical desktop computer.
 
-##### `python sqlite3_to_df.py`
+##### `python sqlite3_to_df.py` (untested)
 
-Crawls the same tree for the resulting `sqlite3` files and loads each into a separate df. Concatenate them if you like.
-
+Crawls the same tree for the resulting `sqlite3` files and loads each into its own dataframe, returning a list, until you run out of patience or memory?
 ### why this was so complicated
 
 1. The files are big—like 10Gb.

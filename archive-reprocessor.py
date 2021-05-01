@@ -13,7 +13,6 @@ import ijson
 from Database import *
 
 
-
 def db_init(daily_filename):
 	daily_filename=daily_filename[:-3] #remove .gz
 	db_url = get_db_url(daily_filename)
@@ -38,25 +37,26 @@ if __name__ == "__main__":
 		print('started at {}'.format(datetime.datetime.now()))
 
 		gzipfile = datadir + daily_filename
-		ungzipfile = datadir + '{}.json'.format(daily_filename)
+		jsonfile = datadir + '{}.json'.format(daily_filename)
 
 		# try to load the uncompressed file from disk
 		try:
-			f = open(ungzipfile, 'r')
+			f = open(jsonfile, 'r')
 			f.close()
 
 		# if not exist, unzip it
+		# bug sometimes this fails without an error, no file gets written
 		except:
 			print('Unzipping {}{}'.format(datadir, daily_filename))
 			with gzip.open(gzipfile, 'rb') as f_in:
-				with open(ungzipfile, 'wb') as f_out:
+				with open(jsonfile, 'wb') as f_out:
 					shutil.copyfileobj(f_in, f_out)
 
 		finally:
 			# parse and dump all responses
 			# https://pypi.org/project/json-stream-parser/
 			sys.stdout.write('Parsing JSON responses and dumping to db.')
-			with open(ungzipfile, 'r') as f:
+			with open(jsonfile, 'r') as f:
 				session = db_init(daily_filename)
 				for siri_response in extract_responses(f):
 				# for siri_response in load_iter(f):
@@ -67,4 +67,12 @@ if __name__ == "__main__":
 					session.commit() # if too slow, de-indent me?
 
 			print ('finished at {}'.format(datetime.datetime.now()))
+
+		#remove the json file
+		try:
+			os.path.exists(jsonfile)
+			os.remove(jsonfile)
+		except:
+			pass
+
 
