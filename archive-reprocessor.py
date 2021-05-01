@@ -5,7 +5,6 @@
 # todo add logic to dump entire stream to a single sqlite file
 # todo add logic to dump to a CSV
 
-from fnmatch import fnmatch
 import os
 import gzip
 import shutil
@@ -13,15 +12,6 @@ import sys
 import ijson
 from Database import *
 
-def get_daily_filelist(path):
-	daily_filelist=[]
-	include_list = ['daily*.gz']
-	for dirname, _, filenames in os.walk(path):
-		for filename in filenames:
-			if any(fnmatch(filename, pattern) for pattern in include_list):
-				daily_filelist.append(filename)
-	sorted_daily_filelist = sorted(daily_filelist, key=lambda daily_filelist: daily_filelist[6:16])
-	return sorted_daily_filelist
 
 
 def db_init(daily_filename):

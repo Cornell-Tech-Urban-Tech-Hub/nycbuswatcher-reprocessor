@@ -5,7 +5,7 @@
 
 ### usage
 
-`python archive-reprocessor.py`
+##### `python archive-reprocessor.py`
 
 The script will look in `./data` for any files in the form of `daily-YYYY-MM-DD.gz` and starting form the earliest date does the following:
 
@@ -15,6 +15,10 @@ The script will look in `./data` for any files in the form of `daily-YYYY-MM-DD.
 4. Writes each day's data to a single `daily-YYYY-MM-DD.sqlite3` file.
 
 Each daily file takes about 30 minutes to parse on a typical desktop computer.
+
+##### `python sqlite3_to_df.py`
+
+Crawls the same tree for the resulting `sqlite3` files and loads each into a separate df. Concatenate them if you like.
 
 ### why this was so complicated
 

@@ -5,6 +5,7 @@ from sqlalchemy import Column, Date, DateTime, Integer, String, Float
 from sqlalchemy.ext.declarative import declarative_base
 
 import datetime
+from fnmatch import fnmatch
 
 # v1.0 to v1.11 manual migration
 # ALTER TABLE buses ADD(passenger_count varchar(31));
@@ -17,6 +18,15 @@ import datetime
 # ADD COLUMN next_stop_d_along_route float,
 # ADD COLUMN next_stop_d float;
 
+def get_daily_filelist(path):
+	daily_filelist=[]
+	include_list = ['daily*.gz']
+	for dirname, _, filenames in os.walk(path):
+		for filename in filenames:
+			if any(fnmatch(filename, pattern) for pattern in include_list):
+				daily_filelist.append(filename)
+	sorted_daily_filelist = sorted(daily_filelist, key=lambda daily_filelist: daily_filelist[6:16])
+	return sorted_daily_filelist
 
 
 Base = declarative_base()
