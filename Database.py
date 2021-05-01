@@ -73,8 +73,8 @@ def parse_buses(siri_response):
               }
     buses = []
     try:
-        timestamp=siri_response['Siri']['ServiceDelivery']['ResponseTimestamp']
-        for b in siri_response['Siri']['ServiceDelivery']['VehicleMonitoringDelivery'][0]['VehicleActivity']:
+        timestamp=siri_response['ServiceDelivery']['ResponseTimestamp']
+        for b in siri_response['ServiceDelivery']['VehicleMonitoringDelivery'][0]['VehicleActivity']:
             bus = BusObservation(timestamp)
             for k,v in lookup.items():
                 try:

@@ -1,37 +1,22 @@
 # NYC MTA BusTime REPROCESSOR
-- v1 2021 Apr 28
+- v1 2021 Apr 30
 - Anthony Townsend <atownsend@cornell.edu>
 
 
-### why i'm dumb
+### usage
 
-the way that nycbuswatcher creates the daily archives is nasty. all the SIRI responses are concatenated into a single file, but without line breaks so its impossible to read and even `awk` runs out of memory.
+`python archive-reprocessor.py`
 
-# spliting the archives
+The script will look in `./data` for any files in the form of `daily-YYYY-MM-DD.gz` and starting form the earliest date does the following:
 
-`awk '/{"Siri"/{x="F"++i;}{print > x;}' daily-2021-01-24`
+1. Unzips the archive to the current folder with the name structure `daily-YYYY-MM-DD.json.gz`
+2. Begins loading the JSON as a stream, pulling out each `Siri` response, which represents a single route for a single point in time.
+3. Parses each `MonitoredVehicleJourney` into a `BusObservation` class instance, and adds that to a database session. The session is committed after each `Siri` response is parsed.
+4. Writes each day's data to a single `daily-YYYY-MM-DD.sqlite3` file.
 
+Each daily file takes about 30 minutes to parse on a typical desktop computer.
 
+### why this was so complicated
 
-
-
-# TO DO AS OF APRIL 28 IN NOTEBOOK
-1. dates as kwargs
-    - start = 2021-04-01
-    - end = 2021-04-15
-2. verify the daily .gz files exist
-3. loop over each day's file
-    a. extract each individual route files to a NEW (for debugging) temp/date/rt_name folder
-    b. create a list of tuples (response_filename,timestamp) from directory listing
-    c. loop over response_file list for that date/route combo
-        i. open the response
-        ii. parse all the observations into a df (using the full, new parser from Dumpers.py?)
-        iii. add it to a df (try one for whole date_citywide, if too big do each route separate)
-        iv. dump the df to a CSV
-        v. NEVER WRITE ANYTHING TO A DATABASE
-    z. empty temp folder
-
-
-### importing / updating production db
-
-This is probably a bad idea. Need to migrate the main db when I deploy the next version of `master` branch, but for now, can leave this to the side. or if want to add this to the existing db, can manually import / merge with existing records.
+1. The files are big—like 10Gb.
+2. The way that `nycbuswatcher` creates the daily archives is nasty. All the `Siri` responses are concatenated into a single file, but as of 2021-04-30 I hadn't added line breaks! So its impossible to read in python without running out of memory, and even `awk` runs out of memory. So it ook a while to find `ijson` and use a lazy loading generator approach.

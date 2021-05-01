@@ -1,14 +1,17 @@
 # archive-reprocessor.py
 # 30 april 2021
 
+# todo add logic for mysql dump too
+# todo add logic to dump entire stream to a single sqlite file
+# todo add logic to dump to a CSV
+
 from fnmatch import fnmatch
 import os
 import gzip
 import shutil
 import sys
-from json_stream_parser import load_iter
+import ijson
 from Database import *
-
 
 def get_daily_filelist(path):
 	daily_filelist=[]
@@ -22,10 +25,18 @@ def get_daily_filelist(path):
 
 
 def db_init(daily_filename):
+	daily_filename=daily_filename[:-3] #remove .gz
 	db_url = get_db_url(daily_filename)
 	create_table(db_url)
 	session = get_session(db_url)
 	return session
+
+# after https://www.aylakhan.tech/?p=27
+def extract_responses(f):
+	responses = ijson.items(f, 'Siri', multiple_values=True)
+	for response in responses:
+		yield response
+
 
 if __name__ == "__main__":
 
@@ -57,7 +68,8 @@ if __name__ == "__main__":
 			sys.stdout.write('Parsing JSON responses and dumping to db.')
 			with open(ungzipfile, 'r') as f:
 				session = db_init(daily_filename)
-				for siri_response in load_iter(f):
+				for siri_response in extract_responses(f):
+				# for siri_response in load_iter(f):
 					buses = parse_buses(siri_response)
 					for bus in buses:
 						session.add(bus)
