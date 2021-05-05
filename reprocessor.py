@@ -29,6 +29,9 @@ def extract_responses(f):
 
 if __name__ == "__main__":
 
+	time_started = datetime.datetime.now()
+	print('started at {}'.format(time_started))
+
 	datadir = os.getcwd()+'/data/'
 	dailies = get_daily_filelist(datadir)
 
@@ -62,7 +65,7 @@ if __name__ == "__main__":
 				for siri_response in extract_responses(f):
 					buses = parse_response(siri_response)
 					session.bulk_save_objects(buses)
-					session.commit()
+				session.commit()
 
 
 			print ('finished at {}'.format(datetime.datetime.now()))
@@ -73,5 +76,12 @@ if __name__ == "__main__":
 			os.remove(jsonfile)
 		except:
 			pass
+
+
+
+		# close
+		time_finished = datetime.datetime.now()
+		print ('finished at {}'.format(time_finished))
+		print ('time elapsed: {}'.format(time_finished-time_started))
 
 
