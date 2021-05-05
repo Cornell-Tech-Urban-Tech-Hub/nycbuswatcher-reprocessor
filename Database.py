@@ -9,17 +9,6 @@ from fnmatch import fnmatch
 
 import os
 
-# v1.0 to v1.11 manual migration
-# ALTER TABLE buses ADD(passenger_count varchar(31));
-#
-
-# v1.11 to v1.2 manual migration
-# ALTER TABLE buses
-# ADD COLUMN next_stop_id varchar(63),
-# ADD COLUMN next_stop_eta varchar(63),
-# ADD COLUMN next_stop_d_along_route float,
-# ADD COLUMN next_stop_d float;
-
 def get_daily_filelist(path):
 	daily_filelist=[]
 	include_list = ['daily*.gz']
@@ -56,8 +45,8 @@ def get_session(db_url):
 	session = Session()
 	return session
 
+def parse_bus(bus,timestamp):
 
-def parse_buses(siri_response):
 	lookup = {'route_long':['LineRef'],
 			  'direction':['DirectionRef'],
 			  'service_date': ['FramedVehicleJourneyRef', 'DataFrameRef'],
@@ -83,27 +72,34 @@ def parse_buses(siri_response):
 			  'gtfs_block_id':['BlockRef'],
 			  'passenger_count': ['MonitoredCall', 'Extensions','Capacities','EstimatedPassengerCount']
 			  }
+
+
+	bus_observation = BusObservation(timestamp)
+
+	# todo optimize me -- some kind of lookup table for the vals—tuples or lists that can be joined back up to determine val
+	for k, v in lookup.items():
+		try:
+			if len(v) == 2:
+				val = bus['MonitoredVehicleJourney'][v[0]][v[1]]
+			elif len(v) == 4:
+				val = bus['MonitoredVehicleJourney'][v[0]][v[1]][v[2]][v[3]]
+			else:
+				val = bus['MonitoredVehicleJourney'][v[0]]
+			setattr(bus, k, val)
+		except:
+			pass
+
+	return bus_observation
+
+
+def parse_response(siri_response):
+
 	buses = []
 	try:
 		timestamp=siri_response['ServiceDelivery']['ResponseTimestamp']
-		for b in siri_response['ServiceDelivery']['VehicleMonitoringDelivery'][0]['VehicleActivity']:
-			bus = BusObservation(timestamp)
-			for k,v in lookup.items():
-				try:
-					if len(v) == 2:
-						val = b['MonitoredVehicleJourney'][v[0]][v[1]]
-						setattr(bus, k, val)
-					elif len(v) == 4:
-						val = b['MonitoredVehicleJourney'][v[0]][v[1]][v[2]][v[3]]
-						setattr(bus, k, val)
-					else:
-						val = b['MonitoredVehicleJourney'][v[0]]
-						setattr(bus, k, val)
-				except LookupError:
-					pass
-				except Exception as e:
-					pass
-			buses.append(bus)
+		vehicleActivity=siri_response['ServiceDelivery']['VehicleMonitoringDelivery'][0]['VehicleActivity']
+		[buses.append(parse_bus(bus,timestamp)) for bus in vehicleActivity]
+
 	except KeyError: #no VehicleActivity?
 		pass
 	return buses # returns a list of BusObservation objects

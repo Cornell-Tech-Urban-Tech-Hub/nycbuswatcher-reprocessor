@@ -58,13 +58,12 @@ if __name__ == "__main__":
 			sys.stdout.write('Parsing JSON responses and dumping to db.')
 			with open(jsonfile, 'r') as f:
 				session = db_init(daily_filename)
+
 				for siri_response in extract_responses(f):
-				# for siri_response in load_iter(f):
-					buses = parse_buses(siri_response)
-					for bus in buses:
-						session.add(bus)
-						# sys.stdout.write('.') # <-- is this the big slowdown?
-					session.commit() # if too slow, de-indent me?
+					buses = parse_response(siri_response)
+					session.bulk_save_objects(buses)
+					session.commit()
+
 
 			print ('finished at {}'.format(datetime.datetime.now()))
 
