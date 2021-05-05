@@ -37,7 +37,7 @@ if __name__ == "__main__":
 
 	for daily_filename in dailies:
 
-		print('started at {}'.format(datetime.datetime.now()))
+		print('optimize_bulk_save_ORM started at {}'.format(datetime.datetime.now()))
 
 		gzipfile = datadir + daily_filename
 		jsonfile = datadir + '{}.json'.format(daily_filename)
