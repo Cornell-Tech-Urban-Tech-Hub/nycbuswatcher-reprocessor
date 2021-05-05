@@ -24,18 +24,11 @@ Crawls the same tree for the resulting `sqlite3` files and loads each into its o
 1. The files are big—like 10Gb.
 2. The way that `nycbuswatcher` creates the daily archives is nasty. All the `Siri` responses are concatenated into a single file, but as of 2021-04-30 I hadn't added line breaks! So its impossible to read in python without running out of memory, and even `awk` runs out of memory. So it ook a while to find `ijson` and use a lazy loading generator approach.
 
-##### speeding up with pypy
+#### VIP creating the environment
 
-1. on mac, brew install pypy
-2. create a conda env with pypy 
-    ```conda config --set channel_priority strict
-     conda create -c conda-forge -n pypy pypy
-     conda activate pypy
-     conda install sqlalchemy
-     ```
-3. `pypy -mensurepip --default-pip` not sure what this does [but](https://doc.pypy.org/en/latest/faq.html#module-xyz-does-not-work-with-pypy-importerror)...
-4. `pip install ijson`
-3. run as normal, should be about 
+results with ijson v3.1.4 and higher (via `pip install ijson`) are much better than the conda build
+
+
 
 ### process to pull the archives from server
 
