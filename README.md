@@ -23,3 +23,17 @@ Crawls the same tree for the resulting `sqlite3` files and loads each into its o
 
 1. The files are big—like 10Gb.
 2. The way that `nycbuswatcher` creates the daily archives is nasty. All the `Siri` responses are concatenated into a single file, but as of 2021-04-30 I hadn't added line breaks! So its impossible to read in python without running out of memory, and even `awk` runs out of memory. So it ook a while to find `ijson` and use a lazy loading generator approach.
+
+
+
+### process to pull the archives from server
+
+make a filename list 
+
+`cat response_filelist_all.txt | grep 2021-0[1-2]-* > filelist.txt`
+
+check it and then construct something to batch copy from container to host
+
+`docker cp nycbuswatcher_grabber_1:/app/data/daily-2021-01-24.gz .`
+
+---> #todo dockerize it, add it to the stack, and reprocess the files on the same bus_data volume ina new folder?
