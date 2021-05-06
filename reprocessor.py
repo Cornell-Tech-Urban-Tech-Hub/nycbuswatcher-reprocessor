@@ -1,10 +1,8 @@
 # archive-reprocessor.py
 # 30 april 2021
 
-# todo add logic for mysql dump too
-# todo add logic to dump entire stream to a single sqlite file
-# todo add logic to dump to a CSV
 
+import argparse
 import os
 import gzip
 import shutil
@@ -13,12 +11,16 @@ import ijson
 from Database import *
 
 
-def db_init(daily_filename):
-	daily_filename=daily_filename[:-3] #remove .gz
-	db_url = get_db_url(daily_filename)
-	create_table(db_url)
-	session = get_session(db_url)
-	return session
+def db_init(dest, daily_filename):
+	# dest is either mysql or sqlite
+	if dest=='sqlite':
+		daily_filename=daily_filename[:-3] #remove .gz
+		db_url = get_db_url(dest, daily_filename)
+		create_table(db_url)
+		session = get_session(db_url)
+		return session
+	elif dest=='mysql':
+		return #todo finish me -- add logic for mysql dump too
 
 # after https://www.aylakhan.tech/?p=27
 def extract_responses(f):
@@ -28,6 +30,11 @@ def extract_responses(f):
 
 
 if __name__ == "__main__":
+
+	parser = argparse.ArgumentParser(description='NYCbuswatcher reprocessor, fetches and stores current position for buses')
+	parser.add_argument('-d', '--dest', nargs=1, required=True, choices=['sqlite', 'mysql', 'csv'], help="Destination (valid types are: sqlite, mysql, csv)")
+	args = parser.parse_args()
+
 
 	time_started = datetime.datetime.now()
 	print('started at {}'.format(time_started))
@@ -59,7 +66,7 @@ if __name__ == "__main__":
 			# https://pypi.org/project/json-stream-parser/
 			sys.stdout.write('Parsing JSON responses and dumping to db.')
 			with open(jsonfile, 'r') as f:
-				session = db_init(daily_filename)
+				session = db_init(args.dest, daily_filename)
 
 				# THIS WORKS
 				for siri_response in extract_responses(f):

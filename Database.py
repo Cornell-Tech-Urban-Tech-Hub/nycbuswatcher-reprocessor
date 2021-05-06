@@ -9,6 +9,28 @@ from fnmatch import fnmatch
 
 import os
 
+###### DATABASE INIT ######
+
+def get_session(db_url):
+	engine = create_engine(db_url, echo=False)
+	Session = sessionmaker(bind=engine)
+	session = Session()
+	return session
+
+def get_db_url(dest, daily_filename):
+	if dest == 'sqlite':
+		return 'sqlite:///data/{}.sqlite3'.format(daily_filename)
+	elif dest == 'mysql':
+		return 'mysql://{}:{}@{}:{}/{}'.format('reprocessor', 'reprocessor', 'localhost', '3306', 'reprocessor')
+		# todo w/in the docker stack
+		# return 'mysql://{}:{}@{}:{}/{}'.format('reprocessor', 'reprocessor', 'db', '3306', 'reprocessor')
+
+def create_table(db_url):
+	engine = create_engine(db_url, echo=False)
+	Base.metadata.create_all(engine)
+
+###### HELPERS ######
+
 def get_daily_filelist(path):
 	daily_filelist=[]
 	include_list = ['daily*.gz']
@@ -19,31 +41,6 @@ def get_daily_filelist(path):
 	sorted_daily_filelist = sorted(daily_filelist, key=lambda daily_filelist: daily_filelist[6:16])
 	return sorted_daily_filelist
 
-
-Base = declarative_base()
-
-def create_table(db_url):
-	engine = create_engine(db_url, echo=False)
-	Base.metadata.create_all(engine)
-
-# def get_db_url(dbuser,dbpassword,dbhost,dbport,dbname):
-#     return 'mysql://{}:{}@{}:{}/{}'.format(dbuser,dbpassword,dbhost,dbport,dbname)
-#
-# def get_session(dbuser,dbpassword,dbhost,dbport,dbname):
-#     engine = create_engine(get_db_url(dbuser,dbpassword,dbhost,dbport,dbname), echo=False)
-#     Session = sessionmaker(bind=engine)
-#     session = Session()
-#     return session
-
-def get_db_url(daily_filename):
-	return 'sqlite:///data/{}.sqlite3'.format(daily_filename)
-
-
-def get_session(db_url):
-	engine = create_engine(db_url, echo=False)
-	Session = sessionmaker(bind=engine)
-	session = Session()
-	return session
 
 def parse_bus(bus,timestamp):
 
@@ -111,6 +108,10 @@ def parse_response(siri_response):
 	return buses # returns a list of BusObservation objects
 
 
+
+###### OBJECT MODEL ######
+
+Base = declarative_base()
 
 class BusObservation(Base):
 	__tablename__ = "buses"
