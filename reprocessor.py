@@ -48,7 +48,6 @@ if __name__ == "__main__":
 			f.close()
 
 		# if not exist, unzip it
-		# bug sometimes this fails without an error, no file gets written
 		except:
 			print('Unzipping {}{}'.format(datadir, daily_filename))
 			with gzip.open(gzipfile, 'rb') as f_in:
@@ -62,13 +61,13 @@ if __name__ == "__main__":
 			with open(jsonfile, 'r') as f:
 				session = db_init(daily_filename)
 
+				# THIS WORKS
 				for siri_response in extract_responses(f):
 					buses = parse_response(siri_response)
 					session.bulk_save_objects(buses)
-				session.commit()
 
+			session.commit() # OUTDENTED FOR SPEED
 
-			print ('finished at {}'.format(datetime.datetime.now()))
 
 		#remove the json file
 		try:

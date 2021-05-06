@@ -85,7 +85,7 @@ def parse_bus(bus,timestamp):
 				val = bus['MonitoredVehicleJourney'][v[0]][v[1]][v[2]][v[3]]
 			else:
 				val = bus['MonitoredVehicleJourney'][v[0]]
-			setattr(bus, k, val)
+			setattr(bus_observation, k, val)
 		except:
 			pass
 
@@ -93,12 +93,18 @@ def parse_bus(bus,timestamp):
 
 
 def parse_response(siri_response):
-
 	buses = []
 	try:
 		timestamp=siri_response['ServiceDelivery']['ResponseTimestamp']
 		vehicleActivity=siri_response['ServiceDelivery']['VehicleMonitoringDelivery'][0]['VehicleActivity']
-		[buses.append(parse_bus(bus,timestamp)) for bus in vehicleActivity]
+
+		# # this works
+		# for bus in vehicleActivity:
+		# 	bus_observation = parse_bus(bus,timestamp)
+		# 	buses.append(bus_observation)
+
+		# and so does this, probably faster
+		buses = [ parse_bus(bus, timestamp) for bus in vehicleActivity]
 
 	except KeyError: #no VehicleActivity?
 		pass
