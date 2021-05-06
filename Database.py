@@ -114,7 +114,7 @@ def parse_response(siri_response):
 Base = declarative_base()
 
 class BusObservation(Base):
-	__tablename__ = "buses"
+	__tablename__ = "buses_reprocessed"
 	id = Column(Integer, primary_key=True)
 	timestamp = Column(DateTime)
 	route_long=Column(String(127))

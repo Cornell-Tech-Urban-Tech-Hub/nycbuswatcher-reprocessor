@@ -66,7 +66,7 @@ if __name__ == "__main__":
 			# https://pypi.org/project/json-stream-parser/
 			sys.stdout.write('Parsing JSON responses and dumping to db.')
 			with open(jsonfile, 'r') as f:
-				session = db_init(args.dest, daily_filename)
+				session = db_init(args.dest[0], daily_filename)
 
 				# THIS WORKS
 				for siri_response in extract_responses(f):
