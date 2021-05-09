@@ -28,14 +28,16 @@ def extract_responses(f):
 if __name__ == "__main__":
 
 	parser = argparse.ArgumentParser(description='NYCbuswatcher reprocessor, fetches and stores current position for buses')
-	parser.add_argument('-d', '--dest', nargs=1, required=True, choices=['sqlite', 'mysql', 'csv'], help="Destination (valid types are: sqlite, mysql, csv)")
+	parser.add_argument('datadir', type=str, help="Path to daily response file archives.")
+	parser.add_argument('-d', '--dest', nargs=1, required=True, choices=['sqlite', 'mysql'], help="Destination (valid types are: sqlite, mysql, csv)")
 	args = parser.parse_args()
 
 
 	time_started = datetime.datetime.now()
 	print('started at {}'.format(time_started))
 
-	datadir = os.getcwd()+'/data/'
+	# datadir = os.getcwd()+'/data/'
+	datadir = args.datadir
 	dailies = get_daily_filelist(datadir)
 
 	for daily_filename in dailies:
