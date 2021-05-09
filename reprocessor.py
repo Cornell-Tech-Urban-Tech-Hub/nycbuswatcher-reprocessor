@@ -12,15 +12,11 @@ from Database import *
 
 
 def db_init(dest, daily_filename):
-	# dest is either mysql or sqlite
-	if dest=='sqlite':
-		daily_filename=daily_filename[:-3] #remove .gz
-		db_url = get_db_url(dest, daily_filename)
-		create_table(db_url)
-		session = get_session(db_url)
-		return session
-	elif dest=='mysql':
-		return #todo finish me -- add logic for mysql dump too
+	daily_filename=daily_filename[:-3] #remove .gz
+	db_url = get_db_url(dest, daily_filename)
+	create_table(db_url)
+	session = get_session(db_url)
+	return session
 
 # after https://www.aylakhan.tech/?p=27
 def extract_responses(f):
@@ -73,7 +69,12 @@ if __name__ == "__main__":
 					buses = parse_response(siri_response)
 					session.bulk_save_objects(buses)
 
-			session.commit() # OUTDENTED FOR SPEED
+					# commit after each pass
+					if args.dest[0] == 'mysql':
+						session.commit()
+
+			# ok here for testing on sqlite, but not mysql
+			# session.commit()
 
 
 		#remove the json file

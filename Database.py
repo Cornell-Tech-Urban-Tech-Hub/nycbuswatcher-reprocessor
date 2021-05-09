@@ -21,7 +21,7 @@ def get_db_url(dest, daily_filename):
 	if dest == 'sqlite':
 		return 'sqlite:///data/{}.sqlite3'.format(daily_filename)
 	elif dest == 'mysql':
-		return 'mysql://{}:{}@{}:{}/{}'.format('reprocessor', 'reprocessor', 'localhost', '3306', 'reprocessor')
+		return 'mysql://{}:{}@{}:{}/{}'.format('nycbuswatcher', 'bustime', 'localhost', '3306', 'buses')
 		# todo w/in the docker stack
 		# return 'mysql://{}:{}@{}:{}/{}'.format('reprocessor', 'reprocessor', 'db', '3306', 'reprocessor')
 
