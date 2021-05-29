@@ -45,7 +45,7 @@ if __name__ == "__main__":
 		print('optimize_bulk_save_ORM started at {}'.format(datetime.datetime.now()))
 
 		gzipfile = datadir + daily_filename
-		jsonfile = datadir + '{}.json'.format(daily_filename)
+		jsonfile = datadir + '{}.json'.format(daily_filename[:-3])
 
 		# try to load the uncompressed file from disk
 		try:
@@ -79,14 +79,12 @@ if __name__ == "__main__":
 			# session.commit()
 
 
-		#remove the json file
-		try:
-			os.path.exists(jsonfile)
-			os.remove(jsonfile)
-		except:
-			pass
-
-
+		# #remove the json file
+		# try:
+		# 	os.path.exists(jsonfile)
+		# 	os.remove(jsonfile)
+		# except:
+		# 	pass
 
 		# close
 		time_finished = datetime.datetime.now()

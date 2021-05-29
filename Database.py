@@ -1,13 +1,14 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from sqlalchemy import Column, Date, DateTime, Integer, String, Float
+from sqlalchemy import Column, Date, DateTime, Integer, String, Float, Index
 from sqlalchemy.ext.declarative import declarative_base
 
 import datetime
 from fnmatch import fnmatch
 
 import os
+import dateutil.parser as parser
 
 ###### DATABASE INIT ######
 
@@ -42,13 +43,14 @@ def get_daily_filelist(path):
 	return sorted_daily_filelist
 
 
-def parse_bus(bus,timestamp):
+def parse_bus(bus,server_timestamp):
 
 	lookup = {'route_long':['LineRef'],
 			  'direction':['DirectionRef'],
 			  'service_date': ['FramedVehicleJourneyRef', 'DataFrameRef'],
 			  'trip_id': ['FramedVehicleJourneyRef', 'DatedVehicleJourneyRef'],
 			  'gtfs_shape_id': ['JourneyPatternRef'],
+			  'route_simple': ['PublishedLineName'],
 			  'route_short': ['PublishedLineName'],
 			  'agency': ['OperatorRef'],
 			  'origin_id':['OriginRef'],
@@ -71,7 +73,9 @@ def parse_bus(bus,timestamp):
 			  }
 
 
-	bus_observation = BusObservation(timestamp)
+	bus_observation = BusObservation(server_timestamp)
+
+	setattr(bus_observation,'recorded_at_time',parser.isoparse(bus['RecordedAtTime']))
 
 	# todo optimize me -- some kind of lookup table for the vals—tuples or lists that can be joined back up to determine val
 	for k, v in lookup.items():
@@ -92,7 +96,7 @@ def parse_bus(bus,timestamp):
 def parse_response(siri_response):
 	buses = []
 	try:
-		timestamp=siri_response['ServiceDelivery']['ResponseTimestamp']
+		# timestamp=siri_response['ServiceDelivery']['ResponseTimestamp']
 		vehicleActivity=siri_response['ServiceDelivery']['VehicleMonitoringDelivery'][0]['VehicleActivity']
 
 		# # this works
@@ -100,8 +104,10 @@ def parse_response(siri_response):
 		# 	bus_observation = parse_bus(bus,timestamp)
 		# 	buses.append(bus_observation)
 
+		server_timestamp = siri_response['ServiceDelivery']['ResponseTimestamp']
+
 		# and so does this, probably faster
-		buses = [ parse_bus(bus, timestamp) for bus in vehicleActivity]
+		buses = [ parse_bus(bus,server_timestamp) for bus in vehicleActivity]
 
 	except KeyError: #no VehicleActivity?
 		pass
@@ -116,13 +122,15 @@ Base = declarative_base()
 class BusObservation(Base):
 	__tablename__ = "buses_reprocessed"
 	id = Column(Integer, primary_key=True)
-	timestamp = Column(DateTime)
+	timestamp = Column(DateTime, index=True) # is now RecordedAtTime from SIRI
+	server_timestamp = Column(DateTime)
+	route_simple=Column(String(31))
 	route_long=Column(String(127))
 	direction=Column(String(1))
-	service_date=Column(String(31)) #future check inputs and convert to Date
-	trip_id=Column(String(63))
+	service_date=Column(String(31), index=True) #future check inputs and convert to Date
+	trip_id=Column(String(63), index=True)
 	gtfs_shape_id=Column(String(31))
-	route_short=Column(String(31))
+	route_short=Column(String(31), index=True)
 	agency=Column(String(31))
 	origin_id=Column(String(31))
 	destination_id=Column(String(31))
@@ -151,6 +159,8 @@ class BusObservation(Base):
 				output = output + ('{} {} '.format(var,val))
 		return output
 
-	def __init__(self,timestamp):
-		self.timestamp = datetime.datetime.fromisoformat(timestamp)
+	def __init__(self,server_timestamp):
+		self.server_timestamp = datetime.datetime.fromisoformat(server_timestamp)
 
+Index('index_servicedate_routeshort', BusObservation.service_date, BusObservation.route_short)
+Index('index_routeshort_timestamp', BusObservation.route_short, BusObservation.timestamp)
