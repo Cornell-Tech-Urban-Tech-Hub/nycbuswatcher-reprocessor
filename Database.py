@@ -75,7 +75,7 @@ def parse_bus(bus,server_timestamp):
 
 	bus_observation = BusObservation(server_timestamp)
 
-	setattr(bus_observation,'recorded_at_time',parser.isoparse(bus['RecordedAtTime']))
+	setattr(bus_observation,'recorded_at_time',parser.isoparse(bus_observation['RecordedAtTime']))
 
 	# todo optimize me -- some kind of lookup table for the vals—tuples or lists that can be joined back up to determine val
 	for k, v in lookup.items():
