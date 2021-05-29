@@ -12,6 +12,13 @@ This version operates on the SIRI response dumps created during the Oct 15, 2020
 ### usage
 `python archive-reprocessor.py <optional:datadir> --dest [sqlite, mysql]`
 
+it's possible to run more than one process simultaneously on different folders/files
+
+to watch the db grow
+
+`watch -d -n 60 "mysql -A -pbustime -D buses -u nycbuswatcher -e \"select service_date,count(*) from buses_reprocessed group by service_date\""`
+###
+
 #### how it works
 The script will look in `<datadir>` for any files in the form of `daily-YYYY-MM-DD.gz` and starting form the earliest date does the following:
 
@@ -29,9 +36,6 @@ Crawls the same tree for the resulting `sqlite3` files and loads each into its o
 
 1. The files are big—like 10Gb.
 2. The way that `nycbuswatcher` creates the daily archives is nasty. All the `Siri` responses are concatenated into a single file, but as of 2021-04-30 I hadn't added line breaks! So its impossible to read in python without running out of memory, and even `awk` runs out of memory. So it ook a while to find `ijson` and use a lazy loading generator approach.
-
-
-
 
 ### process to pull the archives from server
 

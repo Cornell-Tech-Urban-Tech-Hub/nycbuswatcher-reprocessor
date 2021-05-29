@@ -37,7 +37,7 @@ if __name__ == "__main__":
 	print('started at {}'.format(time_started))
 
 	# datadir = os.getcwd()+'/data/'
-	datadir = args.datadir
+	datadir = args.datadir+'/'
 	dailies = get_daily_filelist(datadir)
 
 	for daily_filename in dailies:
