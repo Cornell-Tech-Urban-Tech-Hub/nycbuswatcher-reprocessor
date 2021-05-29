@@ -33,16 +33,13 @@ if __name__ == "__main__":
 	args = parser.parse_args()
 
 
-	time_started = datetime.datetime.now()
-	print('started at {}'.format(time_started))
-
 	# datadir = os.getcwd()+'/data/'
 	datadir = args.datadir+'/'
 	dailies = get_daily_filelist(datadir)
 
 	for daily_filename in dailies:
-
-		print('optimize_bulk_save_ORM started at {}'.format(datetime.datetime.now()))
+		time_started = datetime.datetime.now()
+		print('started at {}'.format(datetime.datetime.now()))
 
 		gzipfile = datadir + daily_filename
 		jsonfile = datadir + '{}.json'.format(daily_filename[:-3])
@@ -62,7 +59,7 @@ if __name__ == "__main__":
 		finally:
 			# parse and dump all responses
 			# https://pypi.org/project/json-stream-parser/
-			sys.stdout.write('Parsing JSON responses and dumping to db.')
+			print('Parsing JSON responses and dumping to db.')
 			with open(jsonfile, 'r') as f:
 				session = db_init(args.dest[0], daily_filename)
 
