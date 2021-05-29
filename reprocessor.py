@@ -79,12 +79,12 @@ if __name__ == "__main__":
 			# session.commit()
 
 
-		# #remove the json file
-		# try:
-		# 	os.path.exists(jsonfile)
-		# 	os.remove(jsonfile)
-		# except:
-		# 	pass
+		#remove the json file
+		try:
+			os.path.exists(jsonfile)
+			os.remove(jsonfile)
+		except:
+			pass
 
 		# close
 		time_finished = datetime.datetime.now()
