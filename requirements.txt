@@ -1,6 +1,0 @@
-# todo add the requirements and test build
-
-sqlalchemy
-mysqlclient
-mysql-connector-python
-requests
