@@ -33,7 +33,6 @@ if __name__ == "__main__":
 	args = parser.parse_args()
 
 
-	# datadir = os.getcwd()+'/data/'
 	datadir = args.datadir+'/'
 	dailies = get_daily_filelist(datadir)
 
