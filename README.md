@@ -2,6 +2,8 @@
 - v1 2021 Apr 30
 - Anthony Townsend <atownsend@cornell.edu>
 
+## merged into nycbuswatcher as of 28 june 2021
+
 ### setup
 Install `ijson` with pip, v3.1.4 and higher (via `pip install ijson`) are much faster than the latest conda build.
 

@@ -8,7 +8,7 @@ import gzip
 import shutil
 import sys
 import ijson
-from Database import *
+from ReprocessorDatabase import *
 
 
 def db_init(dest, daily_filename):
